@@ -56,48 +56,19 @@ to be more difficult to fake it.
 
 ## In-Process or Out-Of-Process Fakes?
 
-As you might guess from the above, one of the important distinctions between
-different faking approaches is whether it depends on any form of IPC actually
-taking place. I'm using [the general definition of IPC][ipc] here, which includes
-not only communication over sockets and named pipes, but also via the file
-system, STDIO pipes and memory mapped files.
+As you might guess from the above, one of the important distinctions between different faking approaches is whether it depends on any form of IPC actually taking place. I'm using the general definition of IPC here, which includes not only communication over sockets and named pipes, but also via the file system, STDIO pipes and memory mapped files.
 
-In-process fakes offer the opportunity to completely prevent all IPC, thereby
-allowing tests to be fast and reliable, isolated from packet loss, network
-latency, disconnection and the other things that make IPC challenging. In this
-way, they provide a very strong form of isolation and, if reliability is your
-main concern, are probably the best choice. In some cases, an unreliable or
-long-running service may depend on no IPC whatsoever, making in-process faking
-the only option.
+In-process fakes offer the opportunity to completely prevent all IPC, thereby allowing tests to be fast and reliable, isolated from packet loss, network latency, disconnection and the other things that make IPC challenging. In this way, they provide a very strong form of isolation and, if reliability is your main concern, are probably the best choice. In some cases, an unreliable or long-running service may depend on no IPC whatsoever, making in-process faking the only option.
 
-However, in-process fakes are not always possible/useful. Code bases must be
-designed in advance with this faking strategy in mind, and must either create
-separate builds or separate runtime configurations for production and testing.
-This isn't the only way that such testing becomes less reliable - further
-differences between production and test systems are introduced as the actual
-message placed on the wire isn't checked, and every possible IPC failure scenario
-must now be programatically simulated. In any highly distrubted environment,
-such a level of abstraction from the concrete form IPC takes is likely to raise
-concerns - that's exactly where most of the bugs are, after all. And, in some
-realtime systems, telemetry directly affects validity.
+However, in-process fakes are not always possible/useful. Code bases must be designed in advance with this faking strategy in mind, and must either create separate builds or separate runtime configurations for production and testing. This isn't the only way that such testing becomes less reliable - further differences between production and test systems are introduced as the actual message placed on the wire isn't checked, and every possible IPC failure scenario must now be programatically simulated. In any highly distributed environment, such a level of abstraction from the concrete form IPC takes is likely to raise concerns - that's exactly where most of the bugs are, after all. And, in some realtime systems, telemetry directly affects validity.
+Out-of-process fakes are often easier to insert into an existing system - most system components are likely to be configurable as a matter of necessity, and a certain guaranteed level of abstraction is achieved by the nature of IPC communication (e.g. my Haskell Scotty stub can pretend to be your Ruby Sinatra API because all information is transferred in JSON over HTTP rather than by taking on in-process dependencies). So it's often relatively easy to slot in a fake remote service.
 
-Out-of-process fakes are often easier to insert into an existing system - most
-system components are likely to be configurable as a matter of neccessity, and
-a certain guarateed level of abstraction is acheieved by the nature of IPC
-communication (e.g. my Haskell Scotty stub can pretend to be your Ruby Sinatra
-API because all information is transferred in JSON over HTTP rather than by
-taking on in-process dependencies). So it's often relatively easy to slot in a
-fake remote service.
-
-The unreliability of IPC can also be mitigated when fakes can be hosted closer to,
-or on a more relaible/faster connection to, the running application than production
-services are. Talking to a locally hosted fake on the tester/developer's machine
-reduces the risk of unpredicatable test failures.
+The unreliability of IPC can also be mitigated when fakes can be hosted closer to, or on a more relaible/faster connection to, the running application than production services are. Talking to a locally hosted fake on the tester/developer's machine reduces the risk of unpredictable test failures.
 
 ## Descriptive vs Behavioural Faking
 
 The other axis we might want to consider is what kind of work a fake is doing.
-Lets say we talk to a cyptographically secure randomization service over HTTP in
+Lets say we talk to a cryptographically secure randomization service over HTTP in
 our app to get random numbers. So we have an interface like
 
 ```csharp
@@ -163,14 +134,8 @@ response, or by actually transitioning the state of a simulation.
 
 ## Stubbing vs Mocking vs Service Virtualization
 
-So, at one level, it's all just faking. At another, software vendors have started
-to use terms like "service virtualization" to distinguish their offerings from
-those of others. Confusingly, other vendors make no such distinction in
-terminology. Take WireMock and HoverFly, two very simillar solutions to
-out-of-process faking. Both allow static, dynamic and simulated faking, yet
-WireMock is a "mock" server (clue's in the name), whilst SpectoLabs seem to place
-weight on the distinction between mocking (meaning in-process faking) and service
-virtualization (meaning out-of-process faking).
+So, at one level, it's all just faking. At another, software vendors have started to use terms like "service virtualization" to distinguish their offerings from those of others. Confusingly, other vendors make no such distinction in terminology. Take WireMock and HoverFly, two very simillar solutions to out-of-process faking. Both allow static, dynamic and simulated faking, yet WireMock is a "mock" server (clue's in the name), whilst SpectoLabs seem to place weight on the distinction between mocking (meaning in-process faking) and service virtualization (meaning out-of-process faking).
+A variety of attempts have been made to make the distinctions between stubs, mocks and virtual services clear and fixed. I'm not going to try to establish a general convention on how these terms should be used, but they are convenient monikers so allow me to define what they mean in this discussion:
 
 A variety of attempts have been made to make the distinctions between stubs,
 mocks and virtual services clear and fixed. I'm not going to try to establish
@@ -217,45 +182,12 @@ requests on to the actual service/a more complex mock service, as well as servin
 up canned responses. WireMock is also programmable at run time, giving tests more
 control over how the mock behaves.
 
-* C: We could take our fake webserver and have it pretend to be network
-infrastructure. Instead of an opaque reverse proxy pretending to be the real
-dependency, it could could instead masquerade as a transparent forward proxy, but
-sometimes return responses it makes up, without forwarding the request
-at all. This is what [HoverFly][hvf] does. The difference here is largely one of ease of
-configuration. For clients which are themselves system components running in a
-server farm, a forward proxy is often an easy thing to set up. UI clients
-generally stuggle more to setup proxy configurations. Compare for example the
-relative ease of switching an iOS or Android configuration file to have the
-client point at a different url, with the significantly more involved process of
-getting every simulator and device used to adopt the correct forward proxy
-settings. This also applies to some extent to browser based clients, which often
-use the proxy settings of the host. In a case where tests are parrelized on the
-same machine, tests which program the mock on the fly are highly likely to
-conflict with each other, since they must all use the same proxy. Automating
-setting the system proxy on a device inherently has more depencies on the
-specific OS of the host. This is not a problem faced by reverse proxies however.
+* C: We could take our fake webserver and have it pretend to be network infrastructure. Instead of an opaque reverse proxy pretending to be the real dependency, it could could instead masquerade as a transparent forward proxy, but sometimes return responses it makes up, without forwarding the request at all. This is what HoverFly does. The difference here is largely one of ease of configuration. For clients which are themselves system components running in a server farm, a forward proxy is often an easy thing to set up. UI clients generally stuggle more to setup proxy configurations. Compare for example the relative ease of switching an iOS or Android configuration file to have the client point at a different url, with the significantly more involved process of getting every simulator and device used to adopt the correct forward proxy settings. This also applies to some extent to browser based clients, which often use the proxy settings of the host. In a case where tests are parrelized on the same machine, tests which program the mock on the fly are highly likely to conflict with each other, since they must all use the same proxy. Automating setting the system proxy on a device inherently has more depencies on the specific OS of the host. This is not a problem faced by reverse proxies however
 
-And that's kind of it really. There are a bunch of vendor related reasons to
-perhaps perfer HoverFly to WireMock - if you want to use their SPECTO solution
-as well, for instance. HoverFly is more language agnostic in its middleware,
-and if no one in your shop is at all familar with the JVM, the fact that
-middleware can be written in, say, Python, Node.js, or Erlang will appeal.
+And that's kind of it really. There are a bunch of vendor related reasons to perhaps perfer HoverFly to WireMock - if you want to use their SPECTO solution as well, for instance. HoverFly is more language agnostic in its middleware, and if no one in your shop is at all familiar with the JVM, the fact that middleware can be written in, say, Python, Node.js, or Erlang will appeal.
+However, for me the key difference between Canned and the other two is the lack of any proxying capabilities. It's a super simple, straight forward bit of javascript that works very well for local testing. However, it scales poorly into other kinds of testing, particularly integration environments, because it lacks the ability to act as a proxy as well as a standard webserver.
 
-However, for me the key difference between Canned and the other two is the lack
-of any proxying capabilities. It's a super simple, straight forward bit of
-javascript that works very well for local testing. However, it scales poorly
-into other kinds of testing, particularly integration environments, because it
-lacks the ability to act as a proxy as well as a standard webserver.
-
-Choosing between HoverFly and WireMock is then about what kind of proxying best
-fits your testing. Is it easier to configure a proxy, or to change a host name
-entry in a config file/DNS table? Given that I'm now testing mobile clients,
-I think the choice has to be WireMock, or some other capable reverse-proxy. If
-you are working primarily with backend, containerized services, HoverFly would
-probably be my choice given the ability to mock multiple remote services in a
-single HoverFly instance (enabled by the fact that it is a forward proxy). Few
-of us don't have to consider UI clients, however, and WireMock offers consistency
-for backend and front end testing.
+Choosing between HoverFly and WireMock is then about what kind of proxying best fits your testing. Is it easier to configure a proxy, or to change a host name entry in a config file/DNS table? Given that I'm now testing mobile clients, I think the choice has to be WireMock, or some other capable reverse-proxy. If you are working primarily with backend, containerized services, HoverFly would probably be my choice given the ability to mock multiple remote services in a single HoverFly instance (enabled by the fact that it is a forward proxy). Few of us don't have to consider UI clients, however, and WireMock offers consistency for backend and front end testing.
 
 [ipc]: https://en.wikipedia.org/wiki/Inter-process_communication#Approaches
 [wm]: http://wiremock.org/
