@@ -135,12 +135,8 @@ response, or by actually transitioning the state of a simulation.
 ## Stubbing vs Mocking vs Service Virtualization
 
 So, at one level, it's all just faking. At another, software vendors have started to use terms like "service virtualization" to distinguish their offerings from those of others. Confusingly, other vendors make no such distinction in terminology. Take WireMock and HoverFly, two very simillar solutions to out-of-process faking. Both allow static, dynamic and simulated faking, yet WireMock is a "mock" server (clue's in the name), whilst SpectoLabs seem to place weight on the distinction between mocking (meaning in-process faking) and service virtualization (meaning out-of-process faking).
-A variety of attempts have been made to make the distinctions between stubs, mocks and virtual services clear and fixed. I'm not going to try to establish a general convention on how these terms should be used, but they are convenient monikers so allow me to define what they mean in this discussion:
 
-A variety of attempts have been made to make the distinctions between stubs,
-mocks and virtual services clear and fixed. I'm not going to try to establish
-a general convention on how these terms should be used, but they are convenient
-monikers so allow me to define what they mean in this discussion:
+A variety of attempts have been made to make the distinctions between stubs, mocks and virtual services clear and fixed. I'm not going to try to establish a general convention on how these terms should be used, but they are convenient monikers so allow me to define what they mean in this discussion:
 
 ### Stub:
 A stub is a minimal, ideally static, implementation of a dependency that
