@@ -90,7 +90,7 @@ We could implement a fake that returns a dynamic value dependent on the input:
 
 ```csharp
 class DynamicFake : IRandomizationService {
-  public int NewRandom(int max) => input;
+  public int NewRandom(int max) => max;
 }
 ```
 
@@ -99,7 +99,7 @@ subset of the expected behaviour of the service, just without the IPC call:
 
 ```csharp
 class SimulatorFake : IRandomizationService {
-  public int NewRandom(int max) => new Random().Next(input);
+  public int NewRandom(int max) => new Random().Next(max);
 }
 ```
 
