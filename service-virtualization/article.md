@@ -186,7 +186,7 @@ However, for me the key difference between Canned and the other two is the lack 
 
 Choosing between HoverFly and WireMock is then about what kind of proxying best fits your testing. Is it easier to configure a proxy, or to change a host name entry in a config file/DNS table? Given that I'm now testing mobile clients, I think the choice has to be WireMock, or some other capable reverse-proxy. If you are working primarily with backend, containerized services, HoverFly would probably be my choice given the ability to mock multiple remote services in a single HoverFly instance (enabled by the fact that it is a forward proxy). Few of us don't have to consider UI clients, however, and WireMock offers consistency for backend and front end testing.
 
-Feedback:
+## Feedback:
 
 Thanks to the awesome chaps at HoverFly for their [detailed response][resp] to this discussion. HoverFly may also act as a [reverse proxy][hfrprox], removing the key configuration differences with WireMock.
 
