@@ -9,7 +9,7 @@ we are interested in from the complexity/unpredictability of other system
 components.
 
 There's a growth in these tools of late - [countless][ninject] [mocking][rhino] and [DI][autofac] [frameworks][castlew]
-abound in the lands of JVM and .NET, and new vedors are springing up offering
+abound in the lands of JVM and .NET, and new vendors are springing up offering
 service virtualization tools as alternatives to mocking. Most applications now
 seem to involve IPC, usually over HTTP, and vendors hope to take advantage of
 the general trend back towards fine-grained Service Oriented Architectures. In
