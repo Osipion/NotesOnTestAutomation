@@ -188,7 +188,7 @@ Choosing between HoverFly and WireMock is then about what kind of proxying best 
 
 ## Feedback:
 
-Thanks to the awesome chaps at HoverFly for their [detailed response][resp] to this discussion. HoverFly may also act as a [reverse proxy][hfrprox], removing the key configuration differences with WireMock.
+Thanks to the awesome chaps at HoverFly for their [detailed response][resp] to this discussion. HoverFly may also act as a [reverse proxy][hfrprox], removing the key configuration differences with WireMock. Thanks also to Tom Akehurst of WireMock for his [detailed feedback and links][take].
 
 [ipc]: https://en.wikipedia.org/wiki/Inter-process_communication#Approaches
 [wm]: http://wiremock.org/
@@ -203,3 +203,4 @@ Thanks to the awesome chaps at HoverFly for their [detailed response][resp] to t
 [resp]: https://github.com/SpectoLabs/hoverfly/issues/417
 [wmstate]: http://wiremock.org/docs/stateful-behaviour/
 [hfrprox]: https://docs.hoverfly.io/en/latest/pages/keyconcepts/webserver.html
+[take]: https://github.com/tomakehurst/wiremock/issues/626
